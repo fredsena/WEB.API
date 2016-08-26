@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmsApi", "SmsApi\SmsApi.csproj", "{BEFDD8B4-F357-45AD-BAEA-A73C7C31ED75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sms.Data", "Sms.Data\Sms.Data.csproj", "{C803B116-43E3-4EB5-9CF8-03AB7E458F58}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{09EA32E8-9DF4-4300-89CC-6A5487555E04}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BEFDD8B4-F357-45AD-BAEA-A73C7C31ED75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BEFDD8B4-F357-45AD-BAEA-A73C7C31ED75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BEFDD8B4-F357-45AD-BAEA-A73C7C31ED75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BEFDD8B4-F357-45AD-BAEA-A73C7C31ED75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
