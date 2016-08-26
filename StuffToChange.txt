@@ -1,0 +1,749 @@
+
+1. Add sms.data reference to SmsApi
+2. change Irepository, repository
+4. smsController
+5. DTO
+6. instanciar System.runtime.serialization em Sms.data
+7. Criar projeto Sms.Domain e referenciar em SmsApi
+8. referenciar domain em Sms.data
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace SmsApi.Models
+{
+    public class Country
+    {
+        public string mcc { get; set; }
+        public string cc { get; set; }
+        public string name { get; set; }
+        public Decimal pricePerSMS { get; set; }
+    }
+}
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Xml;
+
+namespace Sms.Data.DTO
+{
+    [DataContract(Name="Country")]
+    public class CountryDTO
+    {
+        [DataMember(Name = "mcc")]
+        public string mcc { get; set; }
+
+        [DataMember(Name = "cc")]
+        public string cc { get; set; }
+
+        [DataMember(Name = "name")]
+        public string name { get; set; }
+
+        [DataMember(Name = "pricePerSMS")]
+        public decimal pricePerSMS { get; set; }
+    }
+}
+using System;
+using System.Collections.Generic;
+
+
+namespace Sms.Data.Models
+{
+    public partial class CountrySm
+    {
+        public int CountrySmsId { get; set; }
+        public string CountryName { get; set; }
+        public string MobileCountryCode { get; set; }
+        public string CountryCode { get; set; }
+        public decimal SmsPrice { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.ModelConfiguration;
+
+namespace Sms.Data.Models.Mapping
+{
+    public class CountrySmMap : EntityTypeConfiguration<CountrySm>
+    {
+        public CountrySmMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.CountrySmsId);
+
+            // Properties
+            this.Property(t => t.CountryName)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            this.Property(t => t.MobileCountryCode).IsRequired().HasMaxLength(3);
+
+            this.Property(t => t.CountryCode)
+                .IsRequired()
+                .HasMaxLength(2);
+
+            // Table & Column Mappings
+            this.ToTable("CountrySms");
+            this.Property(t => t.CountrySmsId).HasColumnName("CountrySmsId");
+            this.Property(t => t.CountryName).HasColumnName("CountryName");
+            this.Property(t => t.MobileCountryCode).HasColumnName("MobileCountryCode");
+            this.Property(t => t.CountryCode).HasColumnName("CountryCode");
+            this.Property(t => t.SmsPrice).HasColumnName("SmsPrice");
+        }
+    }
+}
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+
+namespace SmsApi.Controllers
+{
+    public class HomeController : Controller
+    {
+        public ActionResult Index()
+        {
+            ViewBag.Title = "Home Page";
+
+            return View();
+        }
+    }
+}
+﻿using System.Collections.Generic;
+using Sms.Data.DTO;
+using Sms.Domain.Enum;
+
+namespace Sms.Data.Repository
+{
+    public interface IRepository
+    {
+        IList<CountryDTO> GetAllCountries();
+        Status SendSMS(Sms.Domain.Sms sms);
+        IEnumerable<SentSMSDTO> GetSentSMS(string dateTimeFrom, string dateTimeTo, int skip, int take);
+    }
+}
+﻿
+namespace Sms.Domain.Interfaces
+{
+    public interface IServiceLocator
+    {
+        T Resolve<T>();
+    }
+}
+﻿using Sms.Domain.Enum;
+
+namespace Sms.Domain.Interfaces
+{
+    public interface ISmsFacade
+    {
+        Status Process(Sms sms);
+    }
+}
+﻿using Sms.Domain.Enum;
+
+namespace Sms.Domain.Interfaces
+{
+    interface ISmsSender
+    {
+        Status SendSms(Sms sms);
+    }
+}
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Sms.Domain;
+using Sms.Domain.Enum;
+using Sms.Data.DTO;
+using Sms.Data.Models;
+
+namespace Sms.Data.Repository
+{
+    public class Repository : IRepository, IDisposable
+    {
+        private dbSMSContext _context;
+        public Repository(dbSMSContext context)
+        {
+            _context = context;
+        }
+
+        public IQueryable<SmsTransaction> GetAllSMSSent()
+        {
+            return _context.SmsTransactions;
+        }
+
+        public IList<CountryDTO> GetAllCountries()
+        {
+            return (from c in _context.CountrySms                    
+                    select new CountryDTO()
+                    {
+                        mcc = c.MobileCountryCode,
+                        cc = c.CountryCode,
+                        name = c.CountryName,
+                        pricePerSMS = c.SmsPrice
+
+                    }).ToList();
+        }
+
+        public Status SendSMS(Sms.Domain.Sms sms)
+        {
+            SmsSender smsSender = new SmsSender();            
+            Status status = smsSender.send(sms);
+
+            //Insert into table
+
+            return status;
+        }
+
+        public IEnumerable<SentSMSDTO> GetSentSMS(string dateTimeFrom, string dateTimeTo, int skip, int take)
+        {
+            //var query =
+            //    (from s in _context.SmsTransactions
+            //     where s.DateTransaction >= Convert.ToDateTime(dateTimeFrom) & s.DateTransaction <= Convert.ToDateTime(dateTimeTo)
+            //     select new SmsDTO { 
+                     
+                 
+            //     });
+
+            //select new { ProductName = p.ProductName, CategoryID = p.CategoryID, ProductID = p.ProductID }).ToList()
+
+            //IQueryable<SmsTransaction> query;
+            //query = GetAllSMSSent();            
+
+            //var baseQuery = query.OrderBy(m => m.MobileCountryCode);            
+
+            //var results = baseQuery.Skip(take * skip).Take(take).ToList().Select(f => f.DateTransaction == Convert.ToDateTime(dateTimeFrom));
+
+            //var totalCount = baseQuery.Count();
+
+            //return new SentSMSDTO
+            //{
+            //    totalCount = totalCount,
+            //    smsList = results
+
+            //};
+
+            return null;
+        }
+
+
+        //public IQueryable<Customer> GetAllCustomerWithOrders()
+        //{
+        //    return _context.Customers.Include("Orders");
+        //}
+
+        //public Customer GetCustomer(string id)
+        //{
+        //    return _context.Customers.Include("Orders").Where(c => c.CustomerID == id).FirstOrDefault();
+        //}
+
+        //public IQueryable<Order> GetAllOrders()
+        //{
+        //    return _context.Orders;
+        //}
+
+        //public IQueryable<Order> GetAllOrdersWithOrderDetails()
+        //{
+        //    return _context.Orders.Include("Order_Details");
+        //}
+
+        //public Order GetOrder(int id)
+        //{
+        //    return _context.Orders.Include("Order_Details").Where(o => o.OrderID == id).FirstOrDefault();
+        //}
+
+        //public Order_Detail GetOrderDetail(int id)
+        //{
+        //    return _context.Order_Details.Include("Order").Where(od => od.OrderID == id).FirstOrDefault();
+        //}
+
+        //public IQueryable<Order_Detail> GetOrderDetailForOrder(int orderId)
+        //{
+        //    return _context.Order_Details.Include("Order").Where(o => o.OrderID == orderId);
+        //}
+
+
+        //public IEnumerable<Product> GetProductsForOrder(int orderId)
+        //{
+        //    //return _context.Products.Where(p => p.Order_Details = orderId);
+
+        //    return (from o in _context.Order_Details
+        //            join p in _context.Products on o.ProductID equals p.ProductID
+        //            where o.OrderID == orderId
+        //            select new { ProductName = p.ProductName, CategoryID = p.CategoryID, ProductID = p.ProductID }).ToList()
+        //                  .Select(x => new Product { ProductName = x.ProductName, CategoryID = x.CategoryID, ProductID = x.ProductID });
+
+
+        //}
+
+
+        public void Dispose()
+        {
+            if (_context != null)
+                _context = null;
+        }
+    }
+}
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Xml;
+
+namespace Sms.Data.DTO
+{
+    [DataContract(Name = "SentSMS")]
+    public class SentSMSDTO
+    {
+        [DataMember(Name = "totalCount")]
+        public int totalCount { get; set; }
+        
+        [DataMember(Name = "items")]
+        public List<SmsDTO> smsList { get; set; }
+    }
+}
+﻿
+using System;
+using System.Collections.Generic;
+using Sms.Domain.Interfaces;
+
+namespace Sms.Domain
+{
+    internal class ServiceLocator : IServiceLocator
+    {
+        private readonly Dictionary<Type, Func<object>> services;
+
+        public ServiceLocator()
+        {
+            this.services = new Dictionary<Type, Func<object>>();
+        }
+
+        public void Register<T>(Func<T> resolver)
+        {
+            this.services[typeof(T)] = () => resolver();
+        }
+
+        public T Resolve<T>()
+        {
+            return (T)this.services[typeof(T)]();
+        }
+    }
+}
+﻿
+namespace Sms.Domain
+{
+    public class Sms
+    {
+        public string from { get; set; }
+        public string to { get; set; }
+        public string text { get; set; }
+    }
+}
+﻿using SmsApi.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
+using Sms.Data;
+using Sms.Data.Repository;
+using Sms.Data.Models;
+using Sms.Data.DTO;
+using System.Web.Http.Results;
+using Sms.Domain;
+using Sms.Domain.Enum;
+
+namespace SmsApi.Controllers
+{
+    public class SmsController : ApiController
+    {
+        [ActionName("countries.json")]
+        public IHttpActionResult GetCountriesJson()       
+        {
+            return Ok(GetCountries());
+        }
+
+        [ActionName("countries.xml")]
+        public IHttpActionResult GetCountriesXml()
+        {
+            return Content(HttpStatusCode.OK, GetCountries(), Configuration.Formatters.XmlFormatter);
+        }
+
+        [ActionName("send.json")]
+        public IHttpActionResult SendSMSJson(string from, string to, string text)
+        {
+            var result = SendSMS(from, to, text);
+
+            if (result == Status.Success)
+                return Content(HttpStatusCode.OK, "Sucess");
+            else
+                return Content(HttpStatusCode.NotModified, "Failed");
+        }
+
+        [ActionName("send.xml")]
+        public IHttpActionResult SendSMSXml(string from, string to, string text)
+        {
+            var result = SendSMS(from, to, text);
+            
+            if (result == Status.Success)
+                return Content(HttpStatusCode.OK, "Sucess", Configuration.Formatters.XmlFormatter);
+            else            
+                return Content(HttpStatusCode.NotModified, "Failed", Configuration.Formatters.XmlFormatter);
+        }
+
+
+        //TODO: Finish
+        [ActionName("sent.json")]
+        public IHttpActionResult GetSentSMSJson(string dateTimeFrom, string dateTimeTo, int skip, int take)
+        {
+            return Ok(GetCountries());
+        }
+
+        //TODO: Finish
+        [ActionName("sent.json")]
+        public IHttpActionResult GetSentSMSXml(string dateTimeFrom, string dateTimeTo, int skip, int take)
+        {
+            return Ok(GetCountries());
+        }
+
+        //TODO: Finish
+        [ActionName("statistics.json")]
+        public IHttpActionResult GetStatisticsJson(string dateTimeFrom, string dateTimeTo, int skip, int take)
+        {
+            return Ok(GetCountries());
+        }
+
+        //TODO: Finish
+        [ActionName("statistics.xml")]
+        public IHttpActionResult GetStatisticsJson(string dateTimeFrom, string dateTimeTo, int skip, int take, string mccList)
+        {
+            return Ok(GetCountries());
+        }
+
+
+        private IList<CountryDTO> GetCountries()
+        {
+            var repository = new Repository(new dbSMSContext());
+            return repository.GetAllCountries();            
+        }
+
+        private Status SendSMS(string from, string to, string text)
+        {
+            var sms = new Sms.Domain.Sms() { from = from, to = to, text = text };
+
+            var repository = new Repository(new dbSMSContext());
+
+            return repository.SendSMS(sms);
+        }
+
+    }
+}
+﻿using Sms.Domain.Enum;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Xml;
+
+namespace Sms.Data.DTO
+{
+    [DataContract(Name = "SMS")]
+    public class SmsDTO
+    {
+        [DataMember(Name = "dateTime")]
+        public string dateTime { get; set; }
+
+        [DataMember(Name = "mcc")]
+        public string mcc { get; set; }
+
+        [DataMember(Name = "from")]
+        public string from { get; set; }
+
+        [DataMember(Name = "to")]
+        public string to { get; set; }
+
+        [DataMember(Name = "price")]
+        public decimal price { get; set; }
+
+        [DataMember(Name = "state")]
+        public Status state { get; set; }
+    }
+}
+﻿using Sms.Domain.Enum;
+using Sms.Domain.Interfaces;
+using System;
+
+namespace Sms.Domain
+{
+    internal class SmsFacade : ISmsFacade
+    {
+        private readonly IServiceLocator serviceLocator;
+
+        public SmsFacade(ServiceLocator serviceLocator)
+        {
+            if (serviceLocator == null)
+            {
+                throw new ArgumentException("serviceLocator null");
+            }
+
+            this.serviceLocator = serviceLocator;
+        }
+
+        public Status Process(Sms sms)
+        {
+            //TODO: build a validator
+            //var validator = this.serviceLocator.Resolve<IOrderValidator>();
+            //if (validator.Validate(order))
+            //{
+            //    //include code here after validation
+            //}
+
+            var sender = this.serviceLocator.Resolve<ISmsSender>();
+
+            return sender.SendSms(sms);
+        }
+
+    }
+}
+﻿using Sms.Domain.Enum;
+using Sms.Domain.Interfaces;
+using Sms.Domain.Services;
+
+namespace Sms.Domain
+{
+    public class SmsSender
+    {
+        ServiceLocator _serviceLocator;
+
+        public SmsSender()
+        {
+            _serviceLocator = new ServiceLocator();
+        }
+
+        public Status send(Sms sms)
+        {
+            _serviceLocator.Register<ISmsSender>(() => (new SmsService()));
+
+            var smsFacade = new SmsFacade(_serviceLocator);
+
+            return smsFacade.Process(sms);
+        }
+
+    }
+}
+﻿using Sms.Domain.Enum;
+using Sms.Domain.Interfaces;
+
+namespace Sms.Domain.Services
+{
+    public class SmsService : ISmsSender
+    {
+        public Status SendSms(Sms sms)
+        {
+            //TODO: Implement SMS sender Service
+            return Status.Success;
+        }
+    }
+}
+using System;
+using System.Collections.Generic;
+
+namespace Sms.Data.Models
+{
+    public partial class SmsTransaction
+    {
+        public int SmsTransactionId { get; set; }
+        public string from { get; set; }
+        public string to { get; set; }
+        public string message { get; set; }
+        public System.DateTime DateTransaction { get; set; }
+        public string MobileCountryCode { get; set; }
+        public decimal SmsPrice { get; set; }
+        public bool Status { get; set; }
+    }
+}
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Data.Entity.ModelConfiguration;
+
+namespace Sms.Data.Models.Mapping
+{
+    public class SmsTransactionMap : EntityTypeConfiguration<SmsTransaction>
+    {
+        public SmsTransactionMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.SmsTransactionId);
+
+            // Properties
+            this.Property(t => t.from)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            this.Property(t => t.to)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            this.Property(t => t.message)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            // Table & Column Mappings
+            this.ToTable("SmsTransaction");
+            this.Property(t => t.SmsTransactionId).HasColumnName("SmsTransactionId");
+            this.Property(t => t.from).HasColumnName("from");
+            this.Property(t => t.to).HasColumnName("to");
+            this.Property(t => t.message).HasColumnName("message");
+            this.Property(t => t.DateTransaction).HasColumnName("DateTransaction");
+            this.Property(t => t.MobileCountryCode).HasColumnName("MobileCountryCode");
+            this.Property(t => t.SmsPrice).HasColumnName("SmsPrice");
+            this.Property(t => t.Status).HasColumnName("Status");
+        }
+    }
+}
+﻿
+namespace Sms.Domain.Enum
+{
+    public enum Status : int
+    {
+        Failed = 0,
+        Success = 1
+    }
+}
+
+USE [master]
+GO
+/****** Object:  Database [dbSms]    Script Date: 26/08/2016 15:47:57 ******/
+CREATE DATABASE [dbSms]
+ CONTAINMENT = NONE
+ ON  PRIMARY 
+( NAME = N'dbSms', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL11.SQLSERVER\MSSQL\DATA\dbSms.mdf' , SIZE = 5120KB , MAXSIZE = UNLIMITED, FILEGROWTH = 1024KB )
+ LOG ON 
+( NAME = N'dbSms_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL11.SQLSERVER\MSSQL\DATA\dbSms_log.ldf' , SIZE = 1024KB , MAXSIZE = 2048GB , FILEGROWTH = 10%)
+GO
+ALTER DATABASE [dbSms] SET COMPATIBILITY_LEVEL = 110
+GO
+IF (1 = FULLTEXTSERVICEPROPERTY('IsFullTextInstalled'))
+begin
+EXEC [dbSms].[dbo].[sp_fulltext_database] @action = 'enable'
+end
+GO
+ALTER DATABASE [dbSms] SET ANSI_NULL_DEFAULT OFF 
+GO
+ALTER DATABASE [dbSms] SET ANSI_NULLS OFF 
+GO
+ALTER DATABASE [dbSms] SET ANSI_PADDING OFF 
+GO
+ALTER DATABASE [dbSms] SET ANSI_WARNINGS OFF 
+GO
+ALTER DATABASE [dbSms] SET ARITHABORT OFF 
+GO
+ALTER DATABASE [dbSms] SET AUTO_CLOSE OFF 
+GO
+ALTER DATABASE [dbSms] SET AUTO_CREATE_STATISTICS ON 
+GO
+ALTER DATABASE [dbSms] SET AUTO_SHRINK OFF 
+GO
+ALTER DATABASE [dbSms] SET AUTO_UPDATE_STATISTICS ON 
+GO
+ALTER DATABASE [dbSms] SET CURSOR_CLOSE_ON_COMMIT OFF 
+GO
+ALTER DATABASE [dbSms] SET CURSOR_DEFAULT  GLOBAL 
+GO
+ALTER DATABASE [dbSms] SET CONCAT_NULL_YIELDS_NULL OFF 
+GO
+ALTER DATABASE [dbSms] SET NUMERIC_ROUNDABORT OFF 
+GO
+ALTER DATABASE [dbSms] SET QUOTED_IDENTIFIER OFF 
+GO
+ALTER DATABASE [dbSms] SET RECURSIVE_TRIGGERS OFF 
+GO
+ALTER DATABASE [dbSms] SET  DISABLE_BROKER 
+GO
+ALTER DATABASE [dbSms] SET AUTO_UPDATE_STATISTICS_ASYNC OFF 
+GO
+ALTER DATABASE [dbSms] SET DATE_CORRELATION_OPTIMIZATION OFF 
+GO
+ALTER DATABASE [dbSms] SET TRUSTWORTHY OFF 
+GO
+ALTER DATABASE [dbSms] SET ALLOW_SNAPSHOT_ISOLATION OFF 
+GO
+ALTER DATABASE [dbSms] SET PARAMETERIZATION SIMPLE 
+GO
+ALTER DATABASE [dbSms] SET READ_COMMITTED_SNAPSHOT OFF 
+GO
+ALTER DATABASE [dbSms] SET HONOR_BROKER_PRIORITY OFF 
+GO
+ALTER DATABASE [dbSms] SET RECOVERY FULL 
+GO
+ALTER DATABASE [dbSms] SET  MULTI_USER 
+GO
+ALTER DATABASE [dbSms] SET PAGE_VERIFY CHECKSUM  
+GO
+ALTER DATABASE [dbSms] SET DB_CHAINING OFF 
+GO
+ALTER DATABASE [dbSms] SET FILESTREAM( NON_TRANSACTED_ACCESS = OFF ) 
+GO
+ALTER DATABASE [dbSms] SET TARGET_RECOVERY_TIME = 0 SECONDS 
+GO
+EXEC sys.sp_db_vardecimal_storage_format N'dbSms', N'ON'
+GO
+USE [dbSms]
+GO
+/****** Object:  Table [dbo].[CountrySms]    Script Date: 26/08/2016 15:47:57 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[CountrySms](
+	[CountrySmsId] [int] IDENTITY(1,1) NOT NULL,
+	[CountryName] [nvarchar](50) NOT NULL,
+	[MobileCountryCode] [nvarchar](3) NOT NULL,
+	[CountryCode] [nvarchar](2) NOT NULL,
+	[SmsPrice] [decimal](19, 4) NOT NULL,
+ CONSTRAINT [PK_dbo.CountrySms] PRIMARY KEY CLUSTERED 
+(
+	[CountrySmsId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+/****** Object:  Table [dbo].[SmsTransaction]    Script Date: 26/08/2016 15:47:57 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[SmsTransaction](
+	[SmsTransactionId] [int] IDENTITY(1,1) NOT NULL,
+	[from] [nvarchar](50) NOT NULL,
+	[to] [nvarchar](50) NOT NULL,
+	[message] [nvarchar](100) NOT NULL,
+	[DateTransaction] [datetime] NOT NULL DEFAULT (getutcdate()),
+	[MobileCountryCode] [nvarchar](3) NOT NULL,
+	[SmsPrice] [decimal](19, 4) NULL,
+	[Status] [bit] NOT NULL,
+ CONSTRAINT [PK_dbo.SmsTransaction] PRIMARY KEY CLUSTERED 
+(
+	[SmsTransactionId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+SET IDENTITY_INSERT [dbo].[CountrySms] ON 
+
+INSERT [dbo].[CountrySms] ([CountrySmsId], [CountryName], [MobileCountryCode], [CountryCode], [SmsPrice]) VALUES (1, N'Germany', N'262', N'49', CAST(0.0550 AS Decimal(19, 4)))
+INSERT [dbo].[CountrySms] ([CountrySmsId], [CountryName], [MobileCountryCode], [CountryCode], [SmsPrice]) VALUES (2, N'Austria', N'232', N'43', CAST(0.0530 AS Decimal(19, 4)))
+INSERT [dbo].[CountrySms] ([CountrySmsId], [CountryName], [MobileCountryCode], [CountryCode], [SmsPrice]) VALUES (3, N'Poland', N'260', N'48', CAST(0.0320 AS Decimal(19, 4)))
+SET IDENTITY_INSERT [dbo].[CountrySms] OFF
+SET IDENTITY_INSERT [dbo].[SmsTransaction] ON 
+
+INSERT [dbo].[SmsTransaction] ([SmsTransactionId], [from], [to], [message], [DateTransaction], [MobileCountryCode], [SmsPrice], [Status]) VALUES (1, N'49262123456789', N'43232987654321', N'Hello from Germany', CAST(N'2016-08-26 01:51:45.910' AS DateTime), N'232', CAST(0.0530 AS Decimal(19, 4)), 1)
+INSERT [dbo].[SmsTransaction] ([SmsTransactionId], [from], [to], [message], [DateTransaction], [MobileCountryCode], [SmsPrice], [Status]) VALUES (2, N'43232987654321', N'49262123456789', N'Hello from Austria', CAST(N'2016-08-26 01:54:02.110' AS DateTime), N'262', CAST(0.0550 AS Decimal(19, 4)), 1)
+INSERT [dbo].[SmsTransaction] ([SmsTransactionId], [from], [to], [message], [DateTransaction], [MobileCountryCode], [SmsPrice], [Status]) VALUES (3, N'48260456789123', N'43232987654321', N'Hello from Poland', CAST(N'2016-08-26 01:54:33.887' AS DateTime), N'232', CAST(0.0530 AS Decimal(19, 4)), 1)
+SET IDENTITY_INSERT [dbo].[SmsTransaction] OFF
+USE [master]
+GO
+ALTER DATABASE [dbSms] SET  READ_WRITE 
+GO
