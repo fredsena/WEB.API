@@ -85,9 +85,9 @@ namespace Sms.Data.Repository
             SELECT
                 dateadd(DAY,0, datediff(day,0, DateTransaction)) day, 
                 MobileCountryCode mcc, 
-                cast(SmsPrice as decimal(10,2)) pricePerSMS, 
+                cast(SmsPrice as decimal(10,3)) pricePerSMS, 
                 Count(MobileCountryCode) count, 
-                cast(Sum(SmsPrice) as decimal(10,2)) totalPrice
+                cast(Sum(SmsPrice) as decimal(10,3)) totalPrice
             FROM [dbo].[SmsTransaction] 	
             WHERE dateadd(DAY,0, datediff(day,0, DateTransaction)) BETWEEN '{0}' AND '{1}' {2} 
             AND Status = 1
