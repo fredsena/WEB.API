@@ -1,0 +1,40 @@
+
+
+Parei no:
+
+SmsDTO
+
+git hub
+
+ var teste =
+                    from o in _context.SmsTransactions
+                    //where o.MobileCountryCode == "232"
+                    let dt = o.DateTransaction
+                    group o by new
+                    {
+                        y = dt.Year,
+                        m = dt.Month,
+                        d = dt.Day,
+                        o.MobileCountryCode,
+                        o.SmsPrice
+                    }
+                        into grp
+                        select new
+                        {
+                            grp.Key.y,
+                            grp.Key.m,
+                            grp.Key.d,
+                            grp.Key.MobileCountryCode,
+                            Qty = grp.Sum(o => o.SmsPrice),
+                            Count = grp.Count(),
+                            Value = grp.Key.SmsPrice
+                        };
+
+
+
+
+day: date [format: “yyyy-MM-dd”]
+o mcc: string [the mobile country code]
+o pricePerSMS: decimal [the price per SMS in EUR, e.g. 0.06]
+o count: integer [the count of SMS on the day and mcc]
+o totalPrice: decimal [the total price of all SMS on the day and mcc in EUR, e.g. 23.64]
