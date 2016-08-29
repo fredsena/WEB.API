@@ -1,30 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Sms.Data.DTO;
+using Sms.Domain.Enum;
 
 namespace Sms.Data.Repository
 {
     public interface IRepository
     {
-        bool SaveAll();
-
-        // Orders
-        //IQueryable<Order> FindOrdersWithOrderDetails(string searchString);
-        //IQueryable<Order> GetAllOrders();
-        //IQueryable<Order> GetAllOrdersWithOrderDetails();
-        //Order GetOrder(int id);
-        //Order_Detail GetOrderDetail(int id);
-
-        //// Order_Detail
-        //IQueryable<Order_Detail> GetOrderDetailForOrder(int orderId);
-
-        ////Customers
-        //IQueryable<Customer> GetAllCustomers();
-        //IQueryable<Customer> GetAllCustomerWithOrders();
-        //Customer GetCustomer(string id);
-
-        //IEnumerable<Product> GetProductsForOrder(int orderId);
+        IList<CountryDTO> GetAllCountries();
+        Status SendSMS(Sms.Domain.Sms sms);
+        SentSMSDTO GetSentSMS(DateTimeOffset dateTimeFrom, DateTimeOffset dateTimeTo, int skip, int take);
+        IEnumerable<StatisticsDTO> GetStatistics(DateTime dateFrom, DateTime dateTo, string mccList);
+        bool IsCountryAndMobileCodeValid(string CountryCode, string MobileCountryCode);
     }
 }

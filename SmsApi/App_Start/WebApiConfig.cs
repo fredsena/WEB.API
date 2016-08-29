@@ -17,13 +17,31 @@ namespace SmsApi
             config.SuppressDefaultHostAuthentication();
             config.Filters.Add(new HostAuthenticationFilter(OAuthDefaults.AuthenticationType));
 
+
             // Web API routes
             config.MapHttpAttributeRoutes();
 
             config.Routes.MapHttpRoute(
+                name: "DefaultApi.DOT.Requests.GetStatistics",
+                routeTemplate: "api/{controller}/{action}/{dateFrom}/{dateTo}/{mccList}"
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi.DOT.Requests.SendSms",
+                routeTemplate: "api/{controller}/{action}/{from}/{to}/{text}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
+                name: "DefaultApi.DOT.Requests.params",
+                routeTemplate: "api/{controller}/{action}/{dateTimeFrom}/{dateTimeTo}/{skip}/{take}",
+                defaults: new { id = RouteParameter.Optional }
+            );
+
+            config.Routes.MapHttpRoute(
                 name: "DefaultApi.DOT.Requests",
-                routeTemplate: "api/{controller}/{action}"
-                );
+                routeTemplate: "api/{controller}/{action}"                
+            );
 
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sms.Data", "Sms.Data\Sms.Da
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{09EA32E8-9DF4-4300-89CC-6A5487555E04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sms.Domain", "Sms.Domain\Sms.Domain.csproj", "{4F12CAE3-DD00-4012-9999-E1A35F17FD1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C803B116-43E3-4EB5-9CF8-03AB7E458F58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F12CAE3-DD00-4012-9999-E1A35F17FD1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F12CAE3-DD00-4012-9999-E1A35F17FD1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F12CAE3-DD00-4012-9999-E1A35F17FD1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F12CAE3-DD00-4012-9999-E1A35F17FD1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

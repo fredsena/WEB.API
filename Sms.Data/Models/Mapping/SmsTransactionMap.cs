@@ -11,7 +11,7 @@ namespace Sms.Data.Models.Mapping
             this.HasKey(t => t.SmsTransactionId);
 
             // Properties
-            this.Property(t => t.from)
+            this.Property(t => t.From)
                 .IsRequired()
                 .HasMaxLength(50);
 
@@ -26,10 +26,12 @@ namespace Sms.Data.Models.Mapping
             // Table & Column Mappings
             this.ToTable("SmsTransaction");
             this.Property(t => t.SmsTransactionId).HasColumnName("SmsTransactionId");
-            this.Property(t => t.from).HasColumnName("from");
+            this.Property(t => t.From).HasColumnName("from");
             this.Property(t => t.to).HasColumnName("to");
             this.Property(t => t.message).HasColumnName("message");
             this.Property(t => t.DateTransaction).HasColumnName("DateTransaction");
+            this.Property(t => t.MobileCountryCode).HasColumnName("MobileCountryCode");
+            this.Property(t => t.SmsPrice).HasColumnName("SmsPrice").HasPrecision(19, 4);
             this.Property(t => t.Status).HasColumnName("Status");
         }
     }
