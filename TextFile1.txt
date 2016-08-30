@@ -1,10 +1,68 @@
 
 
-Parei no:
+using DryIoc;
+using System.Reflection;
+using Sms.Data.Repository;
 
-SmsDTO
+_context.Configuration.ProxyCreationEnabled = false;
 
-git hub
+.AsNoTracking()
+
+        DryIoc.Container _container;
+
+        protected void Application_Start()
+        {
+            AreaRegistration.RegisterAllAreas();
+            GlobalConfiguration.Configure(WebApiConfig.Register);
+            FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            _container = new DryIoc.Container();
+
+            Assembly assembly = typeof(WebApiApplication).Assembly;
+
+            foreach (var controller in assembly.GetTypes().Where(t => typeof(ApiController).IsAssignableFrom(t)))
+            {
+                _container.Register(controller, DryIoc.Reuse.InResolutionScope);                
+            }
+
+            _container.Register<IRepository, Repository>(DryIoc.Reuse.Singleton);
+
+            GlobalConfiguration.Configuration.Services.Replace(typeof(System.Web.Http.Dispatcher.IHttpControllerActivator), new ControllerActivator(_container));
+
+        }
+
+        public override void Dispose()
+        {
+            _container.Dispose();
+            base.Dispose();
+        }
+
+    }
+
+    public class ControllerActivator : System.Web.Http.Dispatcher.IHttpControllerActivator
+    {
+        DryIoc.Container _container;
+
+        public ControllerActivator(DryIoc.Container container)
+        {
+            _container = container;
+        }
+
+        public System.Web.Http.Controllers.IHttpController Create(
+            System.Net.Http.HttpRequestMessage request,
+            System.Web.Http.Controllers.HttpControllerDescriptor controllerDescriptor,
+            Type controllerType)
+        {
+
+            var controller = (System.Web.Http.Controllers.IHttpController)_container.Resolve(controllerType);
+
+            //_container.ResolvePropertiesAndFields(controller);
+
+            return controller;
+        }
+
 
  var teste =
                     from o in _context.SmsTransactions
@@ -33,7 +91,7 @@ git hub
 
 
 
-day: date [format: ìyyyy-MM-ddî]
+day: date [format: ‚Äúyyyy-MM-dd‚Äù]
 o mcc: string [the mobile country code]
 o pricePerSMS: decimal [the price per SMS in EUR, e.g. 0.06]
 o count: integer [the count of SMS on the day and mcc]
