@@ -1,4 +1,87 @@
 
+        [Fact]
+        public void Test4()
+        {
+
+            DryIoc.Container container = new DryIoc.Container();
+
+            Assembly assembly = typeof(WebApiApplication).Assembly;
+
+            foreach (var controller in assembly.GetTypes().Where(t => typeof(ApiController).IsAssignableFrom(t)))
+            {
+                container.Register(controller, DryIoc.Reuse.InResolutionScope);
+            }
+
+            container.Register<IRepository, Repository>(DryIoc.Reuse.Singleton);
+
+            var repoMock = new Mock<IRepository>();
+            repoMock.Setup(x => x.GetAllCountries());
+
+            SmsController smsController = new SmsController(repoMock.Object);
+
+            smsController.Request = new HttpRequestMessage();
+            smsController.Configuration = new HttpConfiguration();
+
+            // Act
+            var response = smsController.GetCountriesJson();
+
+            Assert.IsType<IList<CountryDTO>>(response);
+
+        }
+
+
+        [Fact]
+        public void Test3()
+        {
+            HttpConfiguration config = new HttpConfiguration();
+            config.Routes.MapHttpRoute("DefaultApi.DOT.Requests", "api/{controller}/{countries.json}");
+            HttpServer server = new HttpServer(config);
+
+            using (HttpMessageInvoker client = new HttpMessageInvoker(server))
+            {
+                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://testsms.fredsena.net/api/sms/countries.json"))
+                using (HttpResponseMessage response = client.SendAsync(request, CancellationToken.None).Result)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            }
+        }
+
+
+        [Fact]
+        public void Should_call_GetCountries_Method()
+        {
+            DryIoc.Container container = new DryIoc.Container();
+
+            Assembly assembly = typeof(WebApiApplication).Assembly;
+
+            foreach (var controller in assembly.GetTypes().Where(t => typeof(ApiController).IsAssignableFrom(t)))
+            {
+                container.Register(controller, DryIoc.Reuse.InResolutionScope);
+            }
+
+            container.Register<IRepository, Repository>(DryIoc.Reuse.Singleton);
+
+            var repoMock = new Mock<IRepository>();
+            //repoMock.Setup(x => x.GetAllCountries());
+
+            IRepository repository = new Repository();
+
+            SmsController smsController = new SmsController(repository);
+
+            smsController.Request = new HttpRequestMessage();
+            smsController.Configuration = new HttpConfiguration();
+
+            IHttpActionResult actionResult = smsController.GetCountriesJson();
+
+            var contentResult = actionResult as OkNegotiatedContentResult<IEnumerable<CountryDTO>>;
+
+            Assert.NotNull(contentResult);
+            Assert.NotNull(contentResult.Content);
+
+            repoMock.Verify(m => m.GetAllCountries(), Times.Exactly(1));
+        }
+
 
 using DryIoc;
 using System.Reflection;
